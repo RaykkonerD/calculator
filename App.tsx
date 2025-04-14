@@ -46,7 +46,11 @@ export default function App() {
       setInputValue("");
       setIsResult(false);
     } else {
-      setInputValue(inputValue.substring(0, inputValue.length - 1));
+      let newValue = inputValue.substring(0, inputValue.length - 1);
+      if(newValue.lastIndexOf("log") == newValue.length - 4){
+        newValue = newValue.substring(newValue.length - 4, newValue.length - 1);
+      }
+      setInputValue(newValue);
     }
   };
 
@@ -107,10 +111,12 @@ export default function App() {
       .replaceAll("×", "*")
       .replaceAll(/(-?\d+)\^(-?\d+)/g, "($1)**($2)")
       .replaceAll(/(-?\d+|\([^\)]+\))\^\((-?[\d+\-*/^()\.]+|\([^\)]+\))\)/g, "($1)**($2)")
+      .replaceAll(/(-?\d+)√/g, "$1*√")
       .replaceAll(/√\((\d+(.\d+)?)\)/g, "$1**(1/2)")
       .replaceAll(/(\d+)(\()/g, "$1*$2")
       .replaceAll(/(\))(\()/g, "$1*$2")
       .replaceAll(/(\))(\d+)/g, "$1*$2")
+      .replaceAll(/(-?\d+)log/g, "$1*log")
       .replaceAll(/log\((.*?)\)/g, "Math.log10($1)");
     const factorials = expression.matchAll(/(-?\d+|\([^\)]+\))\!/g);
 
@@ -119,12 +125,12 @@ export default function App() {
       expression = expression.replace(match[0], factorial(value).toString());
     }
 
-    console.log(expression);
-
     const result = eval(expression);
 
-    if (isNaN(result) || !isFinite(result)) {
+    if (isNaN(result)) {
       throw new Error("Inválido!");
+    } else if (!isFinite(result)) {
+      throw new Error("Infinito!");
     }
 
     return result;
@@ -143,7 +149,7 @@ export default function App() {
 
     return (
       <TouchableOpacity style={styles.btn} onPress={() => handleEdit(valueToUse)}>
-        <Text>{value}</Text>
+        <Text style={styles.btnText}>{value}</Text>
       </TouchableOpacity>
     );
   };
@@ -227,7 +233,7 @@ const styles = StyleSheet.create({
   },
   calculatorBody: {
     backgroundColor: "#606060",
-    padding: 20,
+    padding: 30,
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
@@ -245,7 +251,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#782a1f"
   },
   container: {
-    width: 200,
+    width: 280,
     borderRadius: "10px",
     overflow: "hidden",
     gap: 20
@@ -259,20 +265,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   inputText: {
-    fontSize: 25,
+    fontSize: 30,
     color: "#fff",
+    top: 5
   },
   btn: {
     backgroundColor: "#707070",
     color: "#fff",
-    width: 50,
-    height: 50,
-    borderWidth: 0.3,
+    width: 70,
+    height: 70,
+    borderWidth: 0.5,
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 5
+  },
+  btnText: {
+    fontSize: 20
   },
   equalsBtn: {
-    width: 100,
+    width: 140,
     backgroundColor: "#6f8c74",
   },
   clearBtn: {
